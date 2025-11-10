@@ -9,14 +9,16 @@ window.axios = axios;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
+// Permets à Axios d'envoyer les cookies de session avec les requêtes API
+// (important pour Breeze avec auth:web)
+window.axios.defaults.withCredentials = true;
+
 // If a CSRF meta tag exists, set the X-CSRF-TOKEN header for axios requests.
 // This helps when the XSRF cookie isn't available to the client for some reason.
 const token = document.head.querySelector('meta[name="csrf-token"]');
 if (token) {
-	window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
-}
-
-/**
+    window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+}/**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting
  * allows your team to easily build robust real-time web applications.
