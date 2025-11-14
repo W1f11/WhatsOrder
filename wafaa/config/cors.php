@@ -19,7 +19,13 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    // Only allow the frontend origins that will be sending credentials.
+    // Adjust ports if your frontend uses a different dev server port.
+    'allowed_origins' => [
+        'http://localhost:5174',
+        'http://127.0.0.1:5174',
+        'http://localhost:5173',
+    ],
 
     'allowed_origins_patterns' => [],
 
@@ -29,6 +35,7 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
+    // Must be true when frontend sends requests with credentials (cookies).
+    'supports_credentials' => true,
 
 ];

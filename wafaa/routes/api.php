@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MenuItemController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +19,17 @@ use App\Http\Controllers\ReservationController;
 |
 */
 
+// === Authentication Routes (SPA/API) with Session Middleware ===
+// These routes need session middleware to handle cookie-based auth for SPA
+Route::middleware(['web'])->group(function () {
+    Route::post('/register', [RegisteredUserController::class, 'store']);
+    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
+    Route::get('/user', function (Request $request) {
+        return response()->json(['user' => $request->user()]);
+    });
+});
+
 // Public API routes (sans authentification - développement facile)
 Route::get('/menu', [MenuItemController::class, 'index']);
 
@@ -28,15 +41,8 @@ Route::post('/menu/test', function (Request $request) {
     ]);
 });
 
-
-
-
 // Routes protégées (nécessitent authentification via session Breeze)
 Route::middleware('auth:web')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
-    
     // Menu - Manager et Admin uniquement
     Route::post('/menu', [MenuItemController::class, 'store'])->middleware('role:manager|admin');
     Route::put('/menu/{id}', [MenuItemController::class, 'update'])->middleware('role:manager|admin');
@@ -44,8 +50,6 @@ Route::middleware('auth:web')->group(function () {
 });
 
 // Routes publiques supplémentaires (développement - à protéger en production)
-Route::post('/menu', [MenuItemController::class, 'store']);
-Route::put('/menu/{id}', [MenuItemController::class, 'update']);
-Route::delete('/menu/{id}', [MenuItemController::class, 'destroy']);
 Route::post('/orders', [OrderController::class, 'store']);
 Route::post('/reservations', [ReservationController::class, 'store']);
+
