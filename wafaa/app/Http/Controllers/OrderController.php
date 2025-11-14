@@ -59,7 +59,7 @@ class OrderController extends Controller
     // Modifie le statut d'une commande
 
     public function updateStatus(Request $request, $id){
-        $order = Order::wher('restaurant_id', Authid())->findOrFail($id);
+        $order = Order::where('restaurant_id', Auth::id())->findOrFail($id);
         $order->update(['status' => $request->input('status')]);
         return response()->json(['message' => 'Statut de la commande a été modifiée', 'order' => $order]);
     }
