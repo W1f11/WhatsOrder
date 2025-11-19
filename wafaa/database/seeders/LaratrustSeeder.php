@@ -72,24 +72,35 @@ class LaratrustSeeder extends Seeder
     $clientRole->permissions()->syncWithoutDetaching($clientPermissions->pluck('id')->toArray());
 
 
-        // Création des utilisateurs de test
-        $admin = User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@gmail.com',
-        ]);
-        $admin->addRole($adminRole);
+        // Création des utilisateurs de test (évite les doublons avec firstOrCreate)
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'name' => 'Admin',
+                'email_verified_at' => now(),
+                'password' => bcrypt('wafaaessalhi'),
+            ]
+        );
+        $admin->syncRolesWithoutDetaching([$adminRole->id]);
 
-        $manager = User::factory()->create([
-            'name' => 'Manager',
-            'email' => 'manager@gmail.com',
-        ]);
+        $manager = User::firstOrCreate(
+            ['email' => 'manager@gmail.com'],
+            [
+                'name' => 'Manager',
+                'email_verified_at' => now(),
+                'password' => bcrypt('wafaaessalhi'),
+            ]
+        );
+        $manager->syncRolesWithoutDetaching([$managerRole->id]);
 
-        $manager->addRole($managerRole);
-
-        $client = User::factory()->create([
-            'name' => 'Client',
-            'email' => 'client@gmail.com',
-        ]);
-        $client->addRole($clientRole);
+        $client = User::firstOrCreate(
+            ['email' => 'client@gmail.com'],
+            [
+                'name' => 'Client',
+                'email_verified_at' => now(),
+                'password' => bcrypt('password'),
+            ]
+        );
+        $client->syncRolesWithoutDetaching([$clientRole->id]);
     }
 }
