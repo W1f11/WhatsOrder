@@ -26,7 +26,8 @@ export const loginUser = createAsyncThunk(
       const response = await api.post('/login', credentials);
       return response.data; // retourne user
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Erreur lors du login');
+      // Retourne la réponse serveur si disponible, sinon le message d'erreur Axios
+      return rejectWithValue(error.response?.data || error.message || 'Erreur lors du login');
     }
   }
 );
@@ -40,7 +41,7 @@ export const registerUser = createAsyncThunk(
       const response = await api.post('/register', data);
       return response.data; // retourne user
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Erreur lors de l\'inscription');
+      return rejectWithValue(error.response?.data || error.message || 'Erreur lors de l\'inscription');
     }
   }
 );
@@ -53,8 +54,8 @@ export const logoutUser = createAsyncThunk(
       await fetchCsrfToken();
       await api.post('/logout'); // Breeze supporte /logout avec cookies
       return true;
-    } catch  {
-      return rejectWithValue('Erreur lors de la d\u00e9connexion');
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message || 'Erreur lors de la d\u00e9connexion');
     }
   }
 );

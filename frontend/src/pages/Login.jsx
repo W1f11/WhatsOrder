@@ -16,7 +16,9 @@ export default function Login() {
 
     useEffect(() => {
         if (user) {
-            const returnTo = location.state?.from?.pathname || '/profile';
+            // If there is a `from` location (ProtectedRoute redirect), go there,
+            // otherwise default to the reservation creation page.
+            const returnTo = location.state?.from?.pathname || '/reservation/new';
             navigate(returnTo, { replace: true });
         }
 

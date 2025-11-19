@@ -52,10 +52,11 @@ Route::middleware('auth:web')->group(function () {
 // Routes publiques supplémentaires (développement - à protéger en production)
 Route::post('/orders', [OrderController::class, 'store']);
 
-// Routes réservations - protégées par authentification
-Route::middleware('auth:web')->group(function () {
+// Routes réservations - protégées par authentification (use web/session to support cookie auth)
+Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/reservations', [ReservationController::class, 'store']);
     Route::get('/reservations', [ReservationController::class, 'index']);
     Route::patch('/reservations/{id}/cancel', [ReservationController::class, 'cancel']);
 });
+
 

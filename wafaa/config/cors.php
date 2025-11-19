@@ -15,27 +15,29 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    // Allow CORS on API routes, Sanctum CSRF endpoint and typical auth routes
+    // Allow CORS on API routes, Sanctum CSRF endpoint, auth routes, dashboard and built assets (dev)
+    'paths' => [
+        'api/*',
+        'sanctum/csrf-cookie',
+        'login',
+        'logout',
+        'register',
+        'dashboard',
+        'build/*',
+        'build/assets/*',
+    ],
 
     'allowed_methods' => ['*'],
 
-    // Only allow the frontend origins that will be sending credentials.
-    // Adjust ports if your frontend uses a different dev server port.
-    'allowed_origins' => [
-        'http://localhost:5174',
-        'http://127.0.0.1:5174',
-        'http://localhost:5173',
-    ],
-
-    'allowed_origins_patterns' => [],
+    'allowed_origins' => ['http://localhost:5173', 'http://127.0.0.1:5173'],
 
     'allowed_headers' => ['*'],
 
-    'exposed_headers' => [],
+    'exposed_headers' => ['*'],
 
     'max_age' => 0,
 
-    // Must be true when frontend sends requests with credentials (cookies).
     'supports_credentials' => true,
 
 ];
