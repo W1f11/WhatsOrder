@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../features/auth/authThunks';
-import { useNavigate, Link } from 'react-router-dom'; 
+import { useNavigate, Link, useLocation } from 'react-router-dom'; 
 
 export default function Login() {
     const dispatch = useDispatch();
@@ -12,10 +12,15 @@ export default function Login() {
 
     // Redirection si déja connecté
 
-    useEffect(() => {
-        if (user) navigate('/profile');
+    const location = useLocation();
 
-    }, [user, navigate]);
+    useEffect(() => {
+        if (user) {
+            const returnTo = location.state?.from?.pathname || '/profile';
+            navigate(returnTo, { replace: true });
+        }
+
+    }, [user, navigate, location]);
 
     // Mise à jour des champs
     const handleChange = (e) => {

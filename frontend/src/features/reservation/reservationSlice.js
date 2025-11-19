@@ -1,12 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/axios";
+import axios from 'axios';
 
-const ROOT = import.meta.env.VITE_API_URL;
+// Build root host (no /api suffix) — same logic as authThunks
+const ROOT = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000').replace(/\/$/, '');
 
-// Fonction pour récupérer le CSRF token
+// Fonction pour récupérer le CSRF token via axios root (sanctum expects root path)
 const fetchCsrfToken = async () => {
   try {
-    await api.get(`${ROOT}/sanctum/csrf-cookie`, { withCredentials: true });
+    await axios.get(`${ROOT}/sanctum/csrf-cookie`, { withCredentials: true });
   } catch (err) {
     console.error('CSRF token fetch failed:', err);
   }
@@ -15,10 +17,21 @@ const fetchCsrfToken = async () => {
 // Thunk pour créer une réservation
 export const createReservation = createAsyncThunk(
   "reservation/createReservation",
-  async (data, { rejectWithValue }) => {
+  async (data, thunkAPI) => {
+    const { rejectWithValue, getState } = thunkAPI;
     try {
-      await fetchCsrfToken();
-      const res = await api.post("/reservations", data);
+      // If user is authenticated in Redux state, send request with credentials (cookies + CSRF).
+      const state = getState();
+      const user = state.auth && state.auth.user;
+
+      if (user) {
+        await fetchCsrfToken();
+        const res = await api.post('/reservations', data);
+        return res.data;
+      }
+
+      // Guest: send public POST without credentials. Backend must allow this.
+      const res = await axios.post(`${ROOT}/api/reservations`, data);
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);

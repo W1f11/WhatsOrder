@@ -7,6 +7,7 @@ import Register from './pages/Register'
 import UserProfile from './pages/UserProfile'
 import ProtectedRoute from './components/ProtectedRoute'
 import Home from './pages/Home'
+import RestaurantDetail from './pages/RestaurantDetail'
 import Cart from './pages/Cart'
 import Checkout from "./pages/Checkout";
 import ReservationForm from "./pages/ReservationForm";
@@ -21,8 +22,16 @@ function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/menu" element={<MenuList />} />
         <Route path="/menu/:id" element={<MenuItemDetail />} />
+        <Route path="/restaurant/:id" element={<RestaurantDetail />} />
         <Route path='/cart' element={<Cart/>}></Route>
-        <Route path="/reservation/new" element={<ReservationForm />} />
+        <Route
+          path="/reservation/new"
+          element={
+            <ProtectedRoute>
+              <ReservationForm />
+            </ProtectedRoute>
+          }
+        />
      <Route path="/my-reservations" element={<MyReservations />} />
 
         
