@@ -25,7 +25,7 @@ const menuSlice = createSlice({
 			state.items = action.payload;
 			state.categories = [...new Set(action.payload.map(item => item.category))];
 		})
-		.addCase(fetchMenu.regected, (state) => {
+		.addCase(fetchMenu.rejected, (state) => {
 			state.loading = false;
 			state.error = "Erreur lors du chargement du menu";
 		})

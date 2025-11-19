@@ -1,34 +1,56 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/axios";
 
+const ROOT = import.meta.env.VITE_API_URL;
+
+// Fonction pour récupérer le CSRF token
+const fetchCsrfToken = async () => {
+  try {
+    await api.get(`${ROOT}/sanctum/csrf-cookie`, { withCredentials: true });
+  } catch (err) {
+    console.error('CSRF token fetch failed:', err);
+  }
+};
+
 // Thunk pour créer une réservation
 export const createReservation = createAsyncThunk(
   "reservation/createReservation",
   async (data, { rejectWithValue }) => {
     try {
+      await fetchCsrfToken();
       const res = await api.post("/reservations", data);
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response.data);
+      return rejectWithValue(err.response?.data || err.message);
     }
   }
 );
 
-// Thunk pour récupérer les réservations de l’utilisateur
+// Thunk pour récupérer les réservations de l'utilisateur
 export const fetchMyReservations = createAsyncThunk(
   "reservation/fetchMyReservations",
-  async () => {
-    const res = await api.get("/reservations");
-    return res.data;
+  async (_, { rejectWithValue }) => {
+    try {
+      await fetchCsrfToken();
+      const res = await api.get("/reservations");
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
   }
 );
 
 // Thunk pour annuler une réservation
 export const cancelReservation = createAsyncThunk(
   "reservation/cancelReservation",
-  async (id) => {
-    const res = await api.patch(`/reservations/${id}/cancel`);
-    return res.data;
+  async (id, { rejectWithValue }) => {
+    try {
+      await fetchCsrfToken();
+      const res = await api.patch(`/reservations/${id}/cancel`);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
   }
 );
 

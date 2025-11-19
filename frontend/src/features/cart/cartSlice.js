@@ -9,7 +9,7 @@ const cartSlice = createSlice({
         items: savedCart, //array de produits
     },
     reducers: {
-        addCart: (state, action) => {
+        addToCart: (state, action) => {
             const item = action.payload; // { id, name, price, quantity}
             const exist = state.items.find((i) => i.id === item.id);
 
@@ -48,5 +48,5 @@ const cartSlice = createSlice({
         },
     },
 });
-export const { addCart, removeFromCart, clearCart, updateQuantity } = cartSlice.actions;
+export const { addToCart, removeFromCart, clearCart, updateQuantity } = cartSlice.actions;
 export default cartSlice.reducer;

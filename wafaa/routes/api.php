@@ -51,5 +51,11 @@ Route::middleware('auth:web')->group(function () {
 
 // Routes publiques supplémentaires (développement - à protéger en production)
 Route::post('/orders', [OrderController::class, 'store']);
-Route::post('/reservations', [ReservationController::class, 'store']);
+
+// Routes réservations - protégées par authentification
+Route::middleware('auth:web')->group(function () {
+    Route::post('/reservations', [ReservationController::class, 'store']);
+    Route::get('/reservations', [ReservationController::class, 'index']);
+    Route::patch('/reservations/{id}/cancel', [ReservationController::class, 'cancel']);
+});
 

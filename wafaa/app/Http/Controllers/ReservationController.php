@@ -27,10 +27,10 @@ class ReservationController extends Controller
         return response()->json(['message' => 'Reservation created', 'reservation' => $reservation]);
     }
 
-    //  Lister les réservations (Manager/Admin)
+    //  Lister les réservations de l'utilisateur actuel
     public function index()
     {
-        $reservations = Reservation::where('restaurant_id', Auth::id())->get();
+        $reservations = Reservation::where('user_id', Auth::id())->get();
         return response()->json($reservations);
     }
 
