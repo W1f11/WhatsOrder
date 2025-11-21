@@ -7,7 +7,7 @@ import Navbar from "../components/Navbar";
 
 
 
-function RestaurantDetail() {
+function RestaurantDetail({ onCartClick }) {
   const { id } = useParams();
   const [menu, setMenu] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,10 +42,10 @@ function RestaurantDetail() {
   const totalPages = Math.ceil(menu.length / itemsPerPage);
 
   return (
-    <div>
+    <div className="menu">
       <div>
-      <Navbar />
-      <h1 style={{ marginTop: "80px" }}>Menu du restaurant</h1>
+      <Navbar onCartClick={onCartClick} />
+      <h1 style={{  marginTop: "80px", color: "#5c8a7d", fontSize: "32px", fontWeight: "bold" }}>Menu du restaurant</h1>
       {/* rest of your menu */}
     </div>
 

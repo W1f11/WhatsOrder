@@ -57,8 +57,8 @@ function Home() {
 	if (error) return <p style={{ color: "red" }}>Erreur : {error}</p>;
 
 	return (
-		<div className="page-home">
-			<h1 id="restaurants-container">Restaurants</h1>
+		<div className="page-home" >
+			<h1 id="restaurants-container" style={{ color: "#5c8a7d", fontSize: "32px", fontWeight: "bold" }}>Restaurants</h1>
 			<div className="restaurants-container">
 				{restaurants.map((r) => (
 					<div className="restaurant-card" key={r.restaurantID}>

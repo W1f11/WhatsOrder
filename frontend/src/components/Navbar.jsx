@@ -1,27 +1,52 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCartShopping } from "@fortawesome/free-solid-svg-icons"; // <- correct import
+import { faCartShopping } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 
-function Navbar() {
+function Navbar({ onCartClick }) {
   const cartItems = useSelector((state) => state.cart.items);
   const navigate = useNavigate();
+  const handleClick = () => {
+    if (typeof onCartClick === "function") return onCartClick();
+    return navigate("/cart");
+  };
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-[#FFDCDC] shadow-md flex justify-between items-center px-6 py-3 z-50">
-      <div className="text-xl font-bold cursor-pointer" onClick={() => navigate("/")}>
-        MyRestaurant
+
+      {/* Logo */}
+      <div className="cursor-pointer" onClick={() => navigate("/")}>
+        <img
+          src="/images/logo.png"
+          alt="Logo"
+          className="h-12"
+        />
       </div>
 
-      <div className="relative cursor-pointer" onClick={() => navigate("/cart")}>
-        <FontAwesomeIcon icon={faCartShopping} size="lg" /> {/* <- use imported icon */}
+      {/* Center Links */}
+      <ul className="flex gap-6 text-[18px] font-semibold">
+        <li>
+          <a href="/" className="nav-link">Accueil</a>
+        </li>
+        <li>
+          <a href="#restaurants-container" className="nav-link">Restaurant</a>
+        </li>
+        <li>
+          <a href="/" className="nav-link">Menu</a>
+        </li>
+        {/* Cart Icon */}
+      <li>
+        <button className="nav-link cart-link" onClick={handleClick}>
+        <FontAwesomeIcon icon={faCartShopping} size="lg" />
         {cartItems.length > 0 && (
-          <span className="absolute -top-2 -right-2 bg-[#568F87] text-white text-xs font-bold rounded-full px-2">
-            {cartItems.length}
-          </span>
-        )}
-      </div>
+         <span className="cart-badge">{cartItems.length}</span>
+          )}
+         </button>
+         </li>
+      </ul>
+
+      
     </nav>
   );
 }

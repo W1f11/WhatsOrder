@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 import MenuList from "./pages/MenuList";
@@ -16,14 +16,20 @@ import MyReservations from "./pages/MyReservations";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
+import CartSidebar from "./pages/CartSidebar"; // <-- NOUVEAU
+
 
 function App() {
   const location = useLocation();
+    const [isCartOpen, setCartOpen] = useState(false);
+
 
   return (
     <>
       {/* Header affiché uniquement sur la page Home */}
-      {location.pathname === '/' && <Header />}
+      {location.pathname === '/' && <Header onCartClick={() => setCartOpen((s) => !s)} />}
+      
+      <CartSidebar isOpen={isCartOpen} onClose={() => setCartOpen(false)} />
       <Hero />
 
       <div className="app-content">
@@ -35,7 +41,7 @@ function App() {
           <Route path="/menu" element={<MenuList />} />
           <Route path="/menu/:id" element={<MenuItemDetail />} />
 
-          <Route path="/restaurant/:id" element={<RestaurantDetail />} />
+          <Route path="/restaurant/:id" element={<RestaurantDetail onCartClick={() => setCartOpen((s) => !s)} />} />
           <Route path="/cart" element={<Cart />} />
 
           <Route
