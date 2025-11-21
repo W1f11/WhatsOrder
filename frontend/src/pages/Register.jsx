@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom'; 
 import { registerUser } from '../features/auth/authThunks';
 
-
+import '../App.css'
 export default function Register() {
     const dispatch = useDispatch();
     const navigate = useNavigate();

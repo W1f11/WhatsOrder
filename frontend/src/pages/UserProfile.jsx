@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logoutUser } from '../features/auth/authThunks';
 import { useNavigate } from 'react-router-dom';
 
+
 export default function UserProfile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();

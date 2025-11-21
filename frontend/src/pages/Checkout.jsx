@@ -1,30 +1,39 @@
 import { useSelector, useDispatch } from "react-redux";
 import { clearCart } from "../features/cart/cartSlice";
 import api from "../api/axios";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+
 
 export default function Checkout() {
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.items);
+  // Calculer le total et le mémoriser pour le rendu et le handler
+  const total = useMemo(() => {
+    return cartItems.reduce((sum, i) => {
+      const price = Number(i.price) || 0;
+      const quantity = Number(i.quantity) || 1;
+      return sum + price * quantity;
+    }, 0);
+  }, [cartItems]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const restaurantPhone = "0699425135"; // Remplace par le numéro réel
+  const restaurantPhone = "+212699425135"; // Remplace par le numéro réel
 
   const handleCheckout = async () => {
     if (cartItems.length === 0) return alert("Le panier est vide.");
 
     setLoading(true);
 
-    // Calcul du total
-    const total = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+    // Le total est calculé en-dehors de la fonction pour être réutilisable dans le rendu
+    // (voir `total` défini plus haut via useMemo)
 
-    // Préparer payload pour backend
+    // Préparer payload pour le backend
     const payload = {
       restaurant_id: 1, // Remplacer par l’id réel du restaurant
       items: cartItems.map((i) => ({
         menu_item_id: i.id,
-        quantity: i.quantity,
+        quantity: Number(i.quantity) || 1,
       })),
       note: "",
     };
@@ -33,18 +42,18 @@ export default function Checkout() {
       // Envoyer la commande au backend
       await api.post("/orders", payload);
 
-      // Générer message WhatsApp
+      // Générer le message WhatsApp
       let message = "";
-      for (let i = 0; i < cartItems.length; i++) {
-        const item = cartItems[i];
-        message += item.name + " x" + item.quantity + " = " + (item.price * item.quantity) + " DH\n";
-      }
+      cartItems.forEach((item) => {
+        const price = Number(item.price) || 0;
+        const quantity = Number(item.quantity) || 1;
+        message += `${item.name} x${quantity} = ${price * quantity} €\n`;
+      });
 
-      // Ajouter le total à la fin
-      message += "Total: " + total + " DH";
+      message += `Total: ${total} €`;
 
       // Créer le lien WhatsApp
-      const url = "https://wa.me/" + restaurantPhone + "?text=" + encodeURIComponent(message);
+      const url = `https://wa.me/${restaurantPhone}?text=${encodeURIComponent(message)}`;
 
       // Ouvrir WhatsApp
       window.open(url, "_blank");
@@ -70,15 +79,19 @@ export default function Checkout() {
       {cartItems.length > 0 && (
         <>
           <ul className="mb-4">
-            {cartItems.map((item) => (
-              <li key={item.id}>
-                {item.name} x{item.quantity} = {item.price * item.quantity} DH
-              </li>
-            ))}
+            {cartItems.map((item) => {
+              const price = Number(item.price) || 0;
+              const quantity = Number(item.quantity) || 1;
+              return (
+                <li key={item.id}>
+                  {item.name} x{quantity} = {price * quantity} €
+                </li>
+              );
+            })}
           </ul>
 
           <p className="font-bold mb-4">
-            Total: {cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0)} DH
+            Total: {total} €
           </p>
 
           <button

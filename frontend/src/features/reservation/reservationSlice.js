@@ -1,66 +1,47 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-
-// ============================
-// ROOT DOMAIN
-// ============================
-const ROOT = (import.meta.env.VITE_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
-
-// ============================
-// CSRF for Laravel Breeze/Sanctum
-// ============================
-const fetchCsrfToken = async () => {
-  try {
-    await axios.get(`${ROOT}/sanctum/csrf-cookie`, {
-      withCredentials: true,
-    });
-  } catch (err) {
-    console.error("CSRF fetch failed:", err);
-  }
-};
+import axios from "../../api/axios";
 
 // ============================
 // CREATE RESERVATION
 // ============================
 export const createReservation = createAsyncThunk(
   "reservation/createReservation",
-  async (data, { rejectWithValue, getState }) => {
+  async (data, { rejectWithValue }) => {
     try {
-      const state = getState();
-      const user = state.auth?.user;
-
-      if (!user) {
-        return rejectWithValue({ message: "Utilisateur non authentifié." });
+      // Récupérer le cookie CSRF via l'instance axios (baseURL appliqué)
+      try {
+        await axios.get(`/sanctum/csrf-cookie`);
+      } catch (e) {
+        console.error("Failed to fetch CSRF cookie:", e);
+        return rejectWithValue({ message: "Impossible d'obtenir le cookie CSRF.", raw: e });
       }
 
-      await fetchCsrfToken();
-
-      // Requête authentifiée avec cookie + CSRF
-      const res = await axios.post(`${ROOT}/api/reservations`, data, {
-        withCredentials: true,
-      });
-
+      // Envoyer la réservation
+      const res = await axios.post(`/api/reservations`, data);
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
+      const status = err.response?.status;
+      const data = err.response?.data;
+      console.error("createReservation error:", status, data || err.message);
+      const message = data?.message || (typeof data === "object" ? JSON.stringify(data) : data) || err.message;
+      return rejectWithValue({ message, status, raw: data });
     }
   }
 );
 
 // ============================
-// GET MY RESERVATIONS
+// FETCH MY RESERVATIONS
 // ============================
 export const fetchMyReservations = createAsyncThunk(
   "reservation/fetchMyReservations",
   async (_, { rejectWithValue }) => {
     try {
-      await fetchCsrfToken();
-      const res = await axios.get(`${ROOT}/api/reservations`, {
-        withCredentials: true,
-      });
+      await axios.get(`/sanctum/csrf-cookie`);
+      const res = await axios.get(`/api/reservations`);
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
+      const message = err.response?.data || err.message;
+      return rejectWithValue(message);
     }
   }
 );
@@ -72,13 +53,12 @@ export const cancelReservation = createAsyncThunk(
   "reservation/cancelReservation",
   async (id, { rejectWithValue }) => {
     try {
-      await fetchCsrfToken();
-      const res = await axios.patch(`${ROOT}/api/reservations/${id}/cancel`, null, {
-        withCredentials: true,
-      });
+      await axios.get(`/sanctum/csrf-cookie`);
+      const res = await axios.patch(`/api/reservations/${id}/cancel`, null);
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
+      const message = err.response?.data || err.message;
+      return rejectWithValue(message);
     }
   }
 );
@@ -107,7 +87,8 @@ const reservationSlice = createSlice({
       })
       .addCase(createReservation.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || action.payload || "Erreur création réservation";
+          state.error = action.payload?.message || action.payload || "Erreur création réservation";
+          console.error("createReservation error:", action.payload?.status, action.payload?.raw || action.payload);
       })
 
       // FETCH
@@ -127,9 +108,7 @@ const reservationSlice = createSlice({
       // CANCEL
       .addCase(cancelReservation.fulfilled, (state, action) => {
         const idx = state.items.findIndex((i) => i.id === action.payload.id);
-        if (idx !== -1) {
-          state.items[idx] = action.payload;
-        }
+        if (idx !== -1) state.items[idx] = action.payload;
       });
   },
 });

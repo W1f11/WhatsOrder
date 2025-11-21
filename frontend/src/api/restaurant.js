@@ -6,7 +6,36 @@ const UNSPLASH_ACCESS_KEY = "WahZaw7_w7Uk7L-Agpthb1nUXUyeKa9jp6wY_T0aE4g";
 export const fetchRestaurants = async () => {
   const response = await fetch(FAKE_RESTAURANT_URL);
   if (!response.ok) throw new Error("Erreur lors de la récupération des restaurants");
-  return await response.json();
+
+  const raw = await response.json();
+
+  // The remote API may return different shapes. Normalize to a consistent array of
+  // { restaurantID: Number, restaurantName: string, address: string }
+  let items = [];
+  if (Array.isArray(raw)) items = raw;
+  else if (Array.isArray(raw.data)) items = raw.data;
+  else if (Array.isArray(raw.restaurants)) items = raw.restaurants;
+  else if (raw && typeof raw === 'object') items = [raw];
+
+  const normalized = items
+    .map((it) => {
+      if (!it || typeof it !== 'object') return null;
+      const id = it.restaurantID ?? it.restaurantId ?? it.id ?? it.ID ?? it.Id ?? null;
+      const name = it.restaurantName ?? it.name ?? it.title ?? it.restaurant ?? "Restaurant";
+      const address = it.address ?? it.location ?? it.addr ?? it.city ?? "";
+      const parsedId = id == null ? null : Number(id);
+      return {
+        restaurantID: Number.isNaN(parsedId) ? null : parsedId,
+        restaurantName: name,
+        address,
+        // keep original for debugging if needed
+        _raw: it,
+      };
+    })
+    .filter(Boolean)
+    .filter((r) => r.restaurantID !== null);
+
+  return normalized;
 };
 
 // 👇 Nouveau menu dynamique selon restaurantId

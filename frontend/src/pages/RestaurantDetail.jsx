@@ -3,6 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { fetchMenuByRestaurant } from "../api/restaurant";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../features/cart/cartSlice";
+import Navbar from "../components/Navbar";
+
+
 
 function RestaurantDetail() {
   const { id } = useParams();
@@ -40,7 +43,11 @@ function RestaurantDetail() {
 
   return (
     <div>
-      <h1>Menu du restaurant</h1>
+      <div>
+      <Navbar />
+      <h1 style={{ marginTop: "80px" }}>Menu du restaurant</h1>
+      {/* rest of your menu */}
+    </div>
 
       {/* ✅ Bouton retour */}
       <button

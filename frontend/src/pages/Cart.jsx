@@ -2,6 +2,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { removeFromCart, updateQuantity, clearCart } from "../features/cart/cartSlice";
 import { useMemo } from "react";
 
+
 function Cart() {
     const dispatch = useDispatch();
   const items = useSelector((state) => state.cart.items);
@@ -24,9 +25,9 @@ for (let i = 0; i < items.length; i++) {
 }
 
 console.log(message);
-const whatsappUrl = `https://wa.me/212600000000?text=Commande:%0A${encodeURIComponent(
-    message
-  )}%0ATotal: ${total} DH`;
+const whatsappUrl = `https://wa.me/212699425135?text=${encodeURIComponent(
+    `Commande:\n${message}\nTotal: ${total} DH`
+  )}`;
 
   return (
     <div>
@@ -37,22 +38,40 @@ const whatsappUrl = `https://wa.me/212600000000?text=Commande:%0A${encodeURIComp
             <>
             <div>
                 {items.map((item) => (
-                    <div key={item.id}>
-                        <div>
-                            <h2>{item.name}</h2>
-                            <p>{item.price} DH </p>
+                    <div key={item.id} className="flex items-center space-x-4 py-2 border-b">
+                      {(() => {
+                        const imageSrc =  item.img ;
+                        if (imageSrc) {
+                          return (
+                            <img
+                              src={imageSrc}
+                              alt={item.name}
+                              className="w-20 h-20 object-cover rounded"
+                            />
+                          );
+                        }
+                        return (
+                          <div className="w-20 h-20 bg-gray-100 flex items-center justify-center rounded text-sm text-gray-500">No image</div>
+                        );
+                      })()}
 
-                            <div>
-                                <button onClick={() => dispatch(updateQuantity({ id: item.id, quantity: item.quantity - 1}))} disabled={item.quantity === 1}> - </button>
+                      <div className="flex-1">
+                        <h2 className="font-semibold">{item.name}</h2>
+                        <p className="text-sm text-gray-600">{item.price} DH </p>
 
-                                <span>{item.quantity}</span>
-                                <button onClick={() => dispatch(updateQuantity({ id: item.id, quantity: item.quantity + 1}))}> + </button>
-                            </div>
+                        <div className="mt-2">
+                          <button onClick={() => dispatch(updateQuantity({ id: item.id, quantity: item.quantity - 1}))} disabled={item.quantity === 1} className="px-2 py-1 border rounded"> - </button>
+
+                          <span className="px-3">{item.quantity}</span>
+                          <button onClick={() => dispatch(updateQuantity({ id: item.id, quantity: item.quantity + 1}))} className="px-2 py-1 border rounded"> + </button>
                         </div>
+                      </div>
 
-                        <button onClick={() => dispatch(removeFromCart(item.id))}>Supprimer</button>
+                      <div>
+                        <button onClick={() => dispatch(removeFromCart(item.id))} className="text-red-600">Supprimer</button>
+                      </div>
                     </div>
-                ))}
+                  ))}
             </div>
 
             <div>Total : {total} DH </div>

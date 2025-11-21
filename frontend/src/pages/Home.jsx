@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchRestaurants, fetchRestaurantImage } from "../api/restaurant";
+import "../styles/Home.css";
+
+
 
 function Home() {
 	const navigate = useNavigate();
@@ -54,7 +57,7 @@ function Home() {
 	if (error) return <p style={{ color: "red" }}>Erreur : {error}</p>;
 
 	return (
-		<div>
+		<div className="page-home">
 			<h1 id="restaurants-container">Restaurants</h1>
 			<div className="restaurants-container">
 				{restaurants.map((r) => (
@@ -81,7 +84,12 @@ function Home() {
 						</Link>
 
 						<p>{r.address}</p>
-						<button className="btn" onClick={() => navigate('/reservation/new')}>Réserver</button>
+												<button
+													className="btn"
+													onClick={() => navigate(`/reservation/new?restaurant_id=${r.restaurantID}`, { state: { restaurantId: r.restaurantID } })}
+												>
+													Réserver
+												</button>
 					</div>
 				))}
 			</div>
