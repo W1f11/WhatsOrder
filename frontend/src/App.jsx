@@ -21,16 +21,22 @@ import CartSidebar from "./pages/CartSidebar"; // <-- NOUVEAU
 
 function App() {
   const location = useLocation();
-    const [isCartOpen, setCartOpen] = useState(false);
+  const [isCartOpen, setCartOpen] = useState(false);
 
+  // Pages où Hero et Footer ne doivent pas s'afficher
+  const noHeroFooterPages = ['/profile', '/login', '/register', '/checkout'];
+
+  const showHeroFooter = !noHeroFooterPages.includes(location.pathname);
 
   return (
     <>
       {/* Header affiché uniquement sur la page Home */}
       {location.pathname === '/' && <Header onCartClick={() => setCartOpen((s) => !s)} />}
-      
+
       <CartSidebar isOpen={isCartOpen} onClose={() => setCartOpen(false)} />
-      <Hero />
+
+      {/* Affiche Hero seulement si ce n'est pas une page exclue */}
+      {showHeroFooter && <Hero />}
 
       <div className="app-content">
         <Routes>
@@ -67,8 +73,8 @@ function App() {
         </Routes>
       </div>
 
-      {/* Footer affiché sur toutes les pages */}
-      <Footer />
+      {/* Footer affiché seulement si ce n'est pas une page exclue */}
+      {showHeroFooter && <Footer />}
     </>
   );
 }

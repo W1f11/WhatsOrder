@@ -47,6 +47,10 @@ export default function ReservationForm({ restaurantId }) {
         const reps = await fetchRestaurants();
         if (!mounted) return;
         setRestaurants(reps || []);
+        // If the user didn't specify a restaurant and we got at least one, preselect the first to help UX
+        if ((!restaurantInput || restaurantInput === "") && Array.isArray(reps) && reps.length > 0) {
+          setRestaurantInput(reps[0].restaurantID);
+        }
         setRestaurantsError("");
       } catch (err) {
         if (!mounted) return;

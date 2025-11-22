@@ -16,8 +16,21 @@ export default function Login() {
 
     useEffect(() => {
         if (user) {
-            // If there is a `from` location (ProtectedRoute redirect), go there,
-            // otherwise default to the reservation creation page.
+            // Helper to detect manager role. Matches shapes used elsewhere in the app.
+            const isManager = (u) => {
+                if (!u) return false;
+                if (Array.isArray(u.roles)) return u.roles.includes('manager');
+                if (typeof u.role === 'string') return u.role === 'manager';
+                if (u.email) return u.email === 'manager@gmail.com';
+                return false;
+            };
+
+            // Managers go to their profile (manager dashboard); others go to the reservation page
+            if (isManager(user)) {
+                navigate('/profile', { replace: true });
+                return;
+            }
+
             const returnTo = location.state?.from?.pathname || '/reservation/new';
             navigate(returnTo, { replace: true });
         }
