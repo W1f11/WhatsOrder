@@ -17,25 +17,25 @@ import Footer from "./components/Footer";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import CartSidebar from "./pages/CartSidebar"; // <-- NOUVEAU
+import SpecialMenu from   "./pages/SpecialMenu";
+import About from './pages/About';
 
 
 function App() {
   const location = useLocation();
   const [isCartOpen, setCartOpen] = useState(false);
 
-  // Pages où Hero et Footer ne doivent pas s'afficher
   const noHeroFooterPages = ['/profile', '/login', '/register', '/checkout'];
-
   const showHeroFooter = !noHeroFooterPages.includes(location.pathname);
 
   return (
     <>
-      {/* Header affiché uniquement sur la page Home */}
-      {location.pathname === '/' && <Header onCartClick={() => setCartOpen((s) => !s)} />}
+      {location.pathname === '/' && (
+        <Header onCartClick={() => setCartOpen((s) => !s)} />
+      )}
 
       <CartSidebar isOpen={isCartOpen} onClose={() => setCartOpen(false)} />
 
-      {/* Affiche Hero seulement si ce n'est pas une page exclue */}
       {showHeroFooter && <Hero />}
 
       <div className="app-content">
@@ -43,11 +43,14 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-
           <Route path="/menu" element={<MenuList />} />
           <Route path="/menu/:id" element={<MenuItemDetail />} />
-
-          <Route path="/restaurant/:id" element={<RestaurantDetail onCartClick={() => setCartOpen((s) => !s)} />} />
+          <Route
+            path="/restaurant/:id"
+            element={
+              <RestaurantDetail onCartClick={() => setCartOpen((s) => !s)} />
+            }
+          />
           <Route path="/cart" element={<Cart />} />
 
           <Route
@@ -73,7 +76,10 @@ function App() {
         </Routes>
       </div>
 
-      {/* Footer affiché seulement si ce n'est pas une page exclue */}
+      {/* 👉 SpecialMenu s'affiche uniquement sur la Home */}
+      {location.pathname === '/' && <SpecialMenu />}
+      {location.pathname === '/' && <About />}
+
       {showHeroFooter && <Footer />}
     </>
   );

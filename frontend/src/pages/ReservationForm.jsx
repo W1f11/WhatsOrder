@@ -4,8 +4,7 @@ import { createReservation } from "../features/reservation/reservationSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import { fetchRestaurants } from "../api/restaurant";
 
-
-export default function ReservationForm({ restaurantId }) {
+export default function ReservationForm({ restaurantId, onClose }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -13,7 +12,7 @@ export default function ReservationForm({ restaurantId }) {
 
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [duration] = useState(2); // durée par défaut 2h
+  const [duration] = useState(2);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [restaurantInput, setRestaurantInput] = useState(restaurantId || "");
@@ -21,7 +20,6 @@ export default function ReservationForm({ restaurantId }) {
   const [restaurantsLoading, setRestaurantsLoading] = useState(false);
   const [restaurantsError, setRestaurantsError] = useState("");
 
-  // Resolve restaurant id from props, query string or location.state
   const resolvedRestaurantId = useMemo(() => {
     if (restaurantId) return restaurantId;
     try {
@@ -29,7 +27,7 @@ export default function ReservationForm({ restaurantId }) {
       const q = params.get("restaurant_id") || params.get("restaurant");
       if (q) return Number(q);
     } catch {
-      // ignore
+      console.log("Erreur")
     }
     if (location.state && (location.state.restaurantId || location.state.restaurant)) {
       return location.state.restaurantId || location.state.restaurant;
@@ -37,7 +35,6 @@ export default function ReservationForm({ restaurantId }) {
     return null;
   }, [restaurantId, location.search, location.state]);
 
-  // If no restaurant resolved, fetch restaurant list to let user choose
   useEffect(() => {
     let mounted = true;
     const load = async () => {
@@ -47,7 +44,6 @@ export default function ReservationForm({ restaurantId }) {
         const reps = await fetchRestaurants();
         if (!mounted) return;
         setRestaurants(reps || []);
-        // If the user didn't specify a restaurant and we got at least one, preselect the first to help UX
         if ((!restaurantInput || restaurantInput === "") && Array.isArray(reps) && reps.length > 0) {
           setRestaurantInput(reps[0].restaurantID);
         }
@@ -60,9 +56,7 @@ export default function ReservationForm({ restaurantId }) {
       }
     };
     load();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [resolvedRestaurantId]);
 
   const handleSubmit = async (e) => {
@@ -75,10 +69,9 @@ export default function ReservationForm({ restaurantId }) {
       return;
     }
 
-    // allow using the resolved restaurant id or a typed-in fallback
     const finalRestaurantId = resolvedRestaurantId || (Number(restaurantInput) || null);
     if (!finalRestaurantId) {
-      setError("Impossible de déterminer le restaurant pour la réservation. Entrez l'ID du restaurant.");
+      setError("Impossible de déterminer le restaurant pour la réservation.");
       return;
     }
 
@@ -97,40 +90,35 @@ export default function ReservationForm({ restaurantId }) {
       end_time: endTime.toISOString(),
     };
 
-    console.debug("Creating reservation with payload:", payload);
-
-    const resultAction = await dispatch(
-      createReservation({
-        ...payload,
-      })
-    );
+    const resultAction = await dispatch(createReservation({ ...payload }));
 
     if (createReservation.fulfilled.match(resultAction)) {
       setSuccess("Réservation réussie !");
       navigate("/my-reservations");
+      onClose?.(); // ferme le modal si nécessaire
     } else {
       setError(resultAction.payload?.message || "Erreur création réservation");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto p-5">
-      <h2 className="text-2xl font-bold mb-4">Nouvelle réservation</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {!resolvedRestaurantId && (
-          <div className="space-y-2">
-            <p className="text-yellow-600">Sélectionnez un restaurant pour réserver :</p>
-            {restaurantsLoading ? (
-              <p>Chargement des restaurants...</p>
-            ) : restaurantsError ? (
-              <p className="text-red-600">Erreur: {restaurantsError}</p>
-            ) : (
-              <div>
-                <label>Restaurant</label>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        
+        <h2>Nouvelle réservation</h2>
+        <form onSubmit={handleSubmit}>
+          {!resolvedRestaurantId && (
+            <div>
+              <p>Sélectionnez un restaurant :</p>
+              {restaurantsLoading ? (
+                <p>Chargement...</p>
+              ) : restaurantsError ? (
+                <p style={{ color: "red" }}>Erreur: {restaurantsError}</p>
+              ) : (
                 <select
                   value={restaurantInput}
                   onChange={(e) => setRestaurantInput(e.target.value)}
-                  className="border p-2 w-full"
+                  required
                 >
                   <option value="">-- Choisir --</option>
                   {restaurants.map((r) => (
@@ -139,34 +127,32 @@ export default function ReservationForm({ restaurantId }) {
                     </option>
                   ))}
                 </select>
-              </div>
-            )}
+              )}
+            </div>
+          )}
+          <div>
+            <label>Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              required
+            />
           </div>
-        )}
-        <div>
-          <label>Date</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-            className="border p-2 w-full"
-          />
-        </div>
-        <div>
-          <label>Heure</label>
-          <input
-            type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            required
-            className="border p-2 w-full"
-          />
-        </div>
-        {error && <p className="text-red-600">{error}</p>}
-        {success && <p className="text-green-600">{success}</p>}
-        <button className="bg-blue-600 text-white px-4 py-2 rounded">Réserver</button>
-      </form>
+          <div>
+            <label>Heure</label>
+            <input
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              required
+            />
+          </div>
+          {error && <p style={{ color: "red" }}>{error}</p>}
+          {success && <p style={{ color: "green" }}>{success}</p>}
+          <button type="submit">Réserver</button>
+        </form>
+      </div>
     </div>
   );
 }
