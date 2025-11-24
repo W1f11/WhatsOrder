@@ -1,4 +1,5 @@
 import React from "react";
+import Logo from "../assets/Fauget.png";
 import { useSelector } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCartShopping } from "@fortawesome/free-solid-svg-icons";
@@ -17,11 +18,7 @@ function Navbar({ onCartClick }) {
 
       {/* Logo */}
       <div className="cursor-pointer" onClick={() => navigate("/")}>
-        <img
-          src="/images/logo.png"
-          alt="Logo"
-          className="h-12"
-        />
+        <img src={Logo} alt="Logo" className="h-12" />
       </div>
 
       {/* Center Links */}

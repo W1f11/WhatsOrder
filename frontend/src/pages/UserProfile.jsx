@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
+import { Bar, Pie } from "react-chartjs-2";
+import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, ArcElement, Tooltip, Legend } from "chart.js";
+
+ChartJS.register(BarElement, CategoryScale, LinearScale, ArcElement, Tooltip, Legend);
+
 
 export default function UserProfile() {
   const [activeTab, setActiveTab] = useState("users");
@@ -25,10 +30,12 @@ export default function UserProfile() {
       const usersData = wrap(settled[0]);
       const reservationsData = wrap(settled[1]);
       const statsData = wrap(settled[2]);
+      console.log("STATS DATA = ", statsData);
+
 
       setUsers(Array.isArray(usersData) ? usersData : (usersData?.data ?? []));
       setReservations(Array.isArray(reservationsData) ? reservationsData : (reservationsData?.data ?? []));
-      setStats(typeof statsData === 'object' && statsData ? statsData : { totalReservationsToday: 0, totalOrders: 0, totalClients: 0 });
+      setStats(statsData?.data ??  statsData ??   { totalReservationsToday: 0, totalOrders: 0, totalClients: 0 } );
 
       const errors = [];
       if (settled[0].status !== 'fulfilled') errors.push('users');
@@ -148,25 +155,69 @@ export default function UserProfile() {
         )}
 
         {activeTab === "stats" && (
-          <>
-            <h2 style={titleStyle}>📊 Statistiques</h2>
-            {loadErrors.includes('stats') && <div style={{color:'orange', marginBottom:12}}>Erreur chargement: stats</div>}
-            <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-              <div style={{ padding: 12, borderRadius: 8, background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-                <div style={{ fontSize: 12, color: '#64748b' }}>Réservations aujourd'hui</div>
-                <div style={{ fontSize: 22, fontWeight: 700 }}>{stats.totalReservationsToday ?? 0}</div>
-              </div>
-              <div style={{ padding: 12, borderRadius: 8, background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-                <div style={{ fontSize: 12, color: '#64748b' }}>Commandes</div>
-                <div style={{ fontSize: 22, fontWeight: 700 }}>{stats.totalOrders ?? 0}</div>
-              </div>
-              <div style={{ padding: 12, borderRadius: 8, background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-                <div style={{ fontSize: 12, color: '#64748b' }}>Clients</div>
-                <div style={{ fontSize: 22, fontWeight: 700 }}>{stats.totalClients ?? users.length}</div>
-              </div>
-            </div>
-          </>
-        )}
+  <>
+    <h2 style={titleStyle}>📊 Statistiques</h2>
+
+    {loadErrors.includes('stats') && (
+      <div style={{ color: 'orange', marginBottom: 12 }}>
+        Erreur chargement: stats
+      </div>
+    )}
+
+    {/* Cartes simples */}
+    <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+      <div style={cardStyle}>
+        <div style={cardTitle}>Réservations aujourd'hui</div>
+        <div style={cardNumber}>{stats.totalReservationsToday ?? 0}</div>
+      </div>
+
+      <div style={cardStyle}>
+        <div style={cardTitle}>Commandes</div>
+        <div style={cardNumber}>{stats.totalOrders ?? 0}</div>
+      </div>
+
+      <div style={cardStyle}>
+        <div style={cardTitle}>Clients</div>
+        <div style={cardNumber}>{stats.totalClients ?? users.length}</div>
+      </div>
+    </div>
+
+    {/* GRAPHES */}
+    <div style={{ display: "flex", marginTop: 40, gap: 30 }}>
+
+      {/* Graphe Bar */}
+      <div style={{ width: "45%" }}>
+        <h3 style={{ color: "#568F87" }}>Graphique : Utilisateurs vs Réservations</h3>
+        <Bar
+          data={{
+            labels: ["Clients", "Réservations"],
+            datasets: [{
+              label: "Total",
+              data: [users.length, reservations.length],
+              backgroundColor: ["#6BA292", "#F7DCE7"],
+            }],
+          }}
+        />
+      </div>
+
+      {/* Graphe Pie */}
+      <div style={{ width: "45%" }}>
+        <h3 style={{ color: "#568F87" }}>Répartition des réservations</h3>
+        <Pie
+          data={{
+            labels: ["Aujourd'hui", "Total"],
+            datasets: [{
+              data: [stats.totalReservationsToday, reservations.length],
+              backgroundColor: ["#6BA292", "#F2A7BF"],
+            }],
+          }}
+        />
+      </div>
+
+    </div>
+  </>
+)}
+
       </main>
     </div>
   );
@@ -260,3 +311,20 @@ const actionIcons = {
   gap: "14px",
 };
 
+const cardStyle = {
+  padding: 12,
+  width: "450px",
+  borderRadius: 8,
+  background: "#fff",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.20)",
+};
+
+const cardTitle = {
+  fontSize: 12,
+  color: "#64748b",
+};
+
+const cardNumber = {
+  fontSize: 22,
+  fontWeight: 700,
+};
