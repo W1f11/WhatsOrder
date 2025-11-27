@@ -38,8 +38,8 @@ function RestaurantDetail({ onCartClick }) {
   // ✅ Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentMenu = menu.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(menu.length / itemsPerPage);
+  const currentMenu = menu.slice(indexOfFirstItem, indexOfLastItem); //Extraction des éléments de la page
+  const totalPages = Math.ceil(menu.length / itemsPerPage);//arrondit toujours à l’entier supérieur.
 
   return (
     <div className="menu">

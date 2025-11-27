@@ -13,17 +13,18 @@ export default function Login() {
     // Redirection si déja connecté
 
     const location = useLocation();
+    console.log("USER FROM REDUX:", user);
 
     useEffect(() => {
         if (user) {
             // Helper to detect manager role. Matches shapes used elsewhere in the app.
-            const isManager = (u) => {
-                if (!u) return false;
-                if (Array.isArray(u.roles)) return u.roles.includes('manager');
-                if (typeof u.role === 'string') return u.role === 'manager';
-                if (u.email) return u.email === 'manager@gmail.com';
-                return false;
-            };
+           const isManager = (u) => {
+    return u?.role === "manager" 
+        || u?.roles?.includes("manager")
+        || u?.email === "manager@gmail.com";   // ← ajoute ça si ton backend n’envoie pas role
+};
+
+
 
             // Managers go to their profile (manager dashboard); others go to the reservation page
             if (isManager(user)) {
@@ -34,8 +35,14 @@ export default function Login() {
             const returnTo = location.state?.from?.pathname || '/reservation/new';
             navigate(returnTo, { replace: true });
         }
+        
 
-    }, [user, navigate, location]);
+    console.log("USER FROM REDUX:", user);
+
+
+    }, [user]);
+    
+
 
     // Mise à jour des champs
     const handleChange = (e) => {

@@ -55,6 +55,7 @@ class LaratrustSeeder extends Seeder
         // Attribution les permissions aux rôles
     // Admin a toute les permissions (éviter les doublons avec syncWithoutDetaching)
     $adminRole->permissions()->syncWithoutDetaching(Permission::pluck('id')->toArray());
+    $this->command->info('Admin role created (or existing) with id: ' . $adminRole->id);
 
         // Manager : menu + commandes + réservations
         $managerPermissions = Permission::whereIn('name', [
@@ -63,6 +64,7 @@ class LaratrustSeeder extends Seeder
             'view-reservations','update-reservation-status'
         ])->get();
     $managerRole->permissions()->syncWithoutDetaching($managerPermissions->pluck('id')->toArray());
+    $this->command->info('Manager role created (or existing) with id: ' . $managerRole->id);
 
         // Client : voir le menu, passer la commande, faire une réservation
 
@@ -70,6 +72,7 @@ class LaratrustSeeder extends Seeder
             'view-menu','place-order','make-reservation',
         ])->get();
     $clientRole->permissions()->syncWithoutDetaching($clientPermissions->pluck('id')->toArray());
+    $this->command->info('Client role created (or existing) with id: ' . $clientRole->id);
 
 
         // Création des utilisateurs de test (évite les doublons avec firstOrCreate)
@@ -81,7 +84,9 @@ class LaratrustSeeder extends Seeder
                 'password' => bcrypt('wafaaessalhi'),
             ]
         );
+        // Attach role idempotently and log (avoid duplicate pivot entries)
         $admin->syncRolesWithoutDetaching([$adminRole->id]);
+        $this->command->info('Assigned admin role to user: ' . $admin->email);
 
         $manager = User::firstOrCreate(
             ['email' => 'manager@gmail.com'],
@@ -91,7 +96,9 @@ class LaratrustSeeder extends Seeder
                 'password' => bcrypt('wafaaessalhi'),
             ]
         );
+        // Attach role idempotently and log (avoid duplicate pivot entries)
         $manager->syncRolesWithoutDetaching([$managerRole->id]);
+        $this->command->info('Assigned manager role to user: ' . $manager->email);
 
         $client = User::firstOrCreate(
             ['email' => 'client@gmail.com'],
@@ -101,6 +108,8 @@ class LaratrustSeeder extends Seeder
                 'password' => bcrypt('password'),
             ]
         );
+        // Attach role idempotently and log (avoid duplicate pivot entries)
         $client->syncRolesWithoutDetaching([$clientRole->id]);
+        $this->command->info('Assigned client role to user: ' . $client->email);
     }
 }

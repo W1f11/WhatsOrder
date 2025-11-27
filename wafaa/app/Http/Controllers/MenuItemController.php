@@ -10,8 +10,7 @@ class MenuItemController extends Controller
     // ✅ Afficher tous les plats du restaurant connecté
     public function index()
     {
-        $items = MenuItem::where('restaurant_id', Auth::id())->get();
-        return response()->json($items);
+        return MenuItem::all();
     }
 
 

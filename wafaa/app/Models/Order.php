@@ -21,6 +21,11 @@ class Order extends Model
         return $this->belongsTo(User::class, 'restaurant_id');
     }
 
+    // le client qui a passé la commande
+    public function user(){
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     // les articles inclus dans cette commande
 
     public function items(){

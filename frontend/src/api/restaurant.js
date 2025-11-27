@@ -40,11 +40,11 @@ export const fetchRestaurants = async () => {
 
 // 👇 Nouveau menu dynamique selon restaurantId
 export const fetchMenuByRestaurant = async (restaurantId) => {
-  let category = "burgers";
+  
 
-  if (restaurantId >= 4 && restaurantId <= 6) category = "pizzas";
-  if (restaurantId >= 7 && restaurantId <= 9) category = "desserts";
-  if (restaurantId >= 10) category = "fruits";
+  if (restaurantId >= 4 && restaurantId <= 6) ;
+  if (restaurantId >= 7 && restaurantId <= 9) ;
+  if (restaurantId >= 10) ;
 
   const response = await fetch(
     `https://free-food-menus-api-two.vercel.app/burgers`

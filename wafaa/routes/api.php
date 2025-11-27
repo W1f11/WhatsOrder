@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdressController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MenuItemController;
@@ -7,56 +8,94 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\StatsController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
 
-// === Authentication Routes (SPA/API) with Session Middleware ===
-// These routes need session middleware to handle cookie-based auth for SPA
-Route::middleware(['web'])->group(function () {
-    Route::post('/register', [RegisteredUserController::class, 'store']);
-    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
-    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
-    Route::get('/user', function (Request $request) {
-        return response()->json(['user' => $request->user()]);
-    });
-});
 
-// Public API routes (sans authentification - développement facile)
-Route::get('/menu', [MenuItemController::class, 'index']);
+Route::middleware(['web', 'auth:web'])->group(function () {
 
-// Route TEST - À supprimer en production
-Route::post('/menu/test', function (Request $request) {
-    return response()->json([
-        'message' => 'API fonctionne !',
-        'data' => $request->all()
-    ]);
-});
-
-// Routes protégées (nécessitent authentification via session Breeze)
-Route::middleware('auth:web')->group(function () {
     // Menu - Manager et Admin uniquement
     Route::post('/menu', [MenuItemController::class, 'store'])->middleware('role:manager|admin');
     Route::put('/menu/{id}', [MenuItemController::class, 'update'])->middleware('role:manager|admin');
     Route::delete('/menu/{id}', [MenuItemController::class, 'destroy'])->middleware('role:manager|admin');
-});
 
-// Routes publiques supplémentaires (développement - à protéger en production)
-Route::post('/orders', [OrderController::class, 'store']);
-
-// Routes réservations - protégées par authentification (use web/session to support cookie auth)
-Route::middleware(['web', 'auth'])->group(function () {
+    // Réservations
     Route::post('/reservations', [ReservationController::class, 'store']);
     Route::get('/reservations', [ReservationController::class, 'index']);
     Route::patch('/reservations/{id}/cancel', [ReservationController::class, 'cancel']);
+
+    // Liste utilisateurs (dashboard manager)
+    Route::get('/users', function () {
+        return \App\Models\User::select('id','name','email','phone')->get();
+    })->middleware('role:manager|admin');
+    Route::delete('/users/{id}', function ($id) {
+    $user = \App\Models\User::find($id);
+
+    if (!$user) {
+        return response()->json(['message' => 'Utilisateur non trouvé'], 404);
+    }
+
+    $user->delete();
+
+    return response()->json(['message' => 'Utilisateur supprimé avec succès']);
+})->middleware('role:manager|admin');
+
+
+    // Stats manager
+    Route::get('/stats', function (Request $request) {
+
+        $user = $request->user();
+
+        $managerId = $user->id;
+        $today = \Carbon\Carbon::today();
+
+        return response()->json([
+            'totalReservationsToday' => \App\Models\Reservation::whereDate('start_time', $today)
+                ->where('restaurant_id', $managerId)
+                ->count(),
+            'totalOrders' => \App\Models\Order::where('restaurant_id', $managerId)->count(),
+            'totalClients' => \App\Models\Order::where('restaurant_id', $managerId)
+                ->distinct('user_id')
+                ->count('user_id'),
+        ]);
+    })->middleware('role:manager|admin');
+
 });
+Route::post('/orders', [OrderController::class, 'store']);
+Route::get('/orders', [OrderController::class, 'index']);
+Route::patch('/orders/{id}/status', [OrderController::class, 'updateStatus']);
+
+// Public API routes (sans authentification)
+Route::get('/menu', [MenuItemController::class, 'index']);
+
+// Routes protégées
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Route::get('/adress', [AdressController::class,'index']);

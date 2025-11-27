@@ -58,4 +58,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::middleware('auth:web')->group(function () {
+    Route::post('/menu', [MenuItemController::class, 'store'])->middleware('role:manager|admin');
+    Route::put('/menu/{id}', [MenuItemController::class, 'update'])->middleware('role:manager|admin');
+    Route::delete('/menu/{id}', [MenuItemController::class, 'destroy'])->middleware('role:manager|admin');
+});
+
 require __DIR__.'/auth.php';

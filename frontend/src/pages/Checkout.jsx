@@ -38,11 +38,11 @@ export default function Checkout() {
     };
 
     try {
-      // 1️⃣ Envoyer la commande au backend
+      // Envoyer la commande au backend
       await api.post("/orders", payload);
 
-      // 2️⃣ Générer le message WhatsApp
-      let message = "Votre commande a été enregistrée ✅\n\n";
+      // Générer le message WhatsApp
+      let message = "Votre commande a été enregistrée \n\n";
       cartItems.forEach((item) => {
         const price = Number(item.price) || 0;
         const quantity = Number(item.quantity) || 1;
@@ -50,13 +50,13 @@ export default function Checkout() {
       });
       message += `Total: ${total} €`;
 
-      // 3️⃣ Créer le lien WhatsApp
+      //  Créer le lien WhatsApp
       const url = `https://wa.me/${restaurantPhone}?text=${encodeURIComponent(message)}`;
 
-      // 4️⃣ Ouvrir WhatsApp
+      //  Ouvrir WhatsApp
       window.open(url, "_blank");
 
-      // 5️⃣ Vider le panier
+      //  Vider le panier
       dispatch(clearCart());
       setSuccess(true);
 

@@ -33,6 +33,9 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        // Regenerate session after successful authentication (important for session fixation protection)
+        $request->session()->regenerate();
+
         // Return JSON for API requests, redirect for web requests
         if ($request->wantsJson()) {
             return response()->json([
@@ -40,8 +43,6 @@ class AuthenticatedSessionController extends Controller
                 'user' => $request->user(),
             ], 200);
         }
-
-        $request->session()->regenerate();
 
         return redirect()->intended(RouteServiceProvider::HOME);
     }

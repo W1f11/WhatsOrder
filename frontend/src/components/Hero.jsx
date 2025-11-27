@@ -89,7 +89,7 @@ export default function Hero() {
       navigate(`/restaurant/${firstRestaurantId}`);
     } else {
       // fallback to menu page if we couldn't resolve an id
-      navigate(`/menu`);
+      navigate(`/restaurant/26`);
     }
   };
 

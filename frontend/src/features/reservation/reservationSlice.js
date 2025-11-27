@@ -1,9 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../../api/axios";
 
-// ============================
-// CREATE RESERVATION
-// ============================
+
 export const createReservation = createAsyncThunk(
   "reservation/createReservation",
   async (data, { rejectWithValue }) => {
@@ -29,9 +27,7 @@ export const createReservation = createAsyncThunk(
   }
 );
 
-// ============================
-// FETCH MY RESERVATIONS
-// ============================
+
 export const fetchMyReservations = createAsyncThunk(
   "reservation/fetchMyReservations",
   async (_, { rejectWithValue }) => {
@@ -46,9 +42,7 @@ export const fetchMyReservations = createAsyncThunk(
   }
 );
 
-// ============================
-// CANCEL RESERVATION
-// ============================
+
 export const cancelReservation = createAsyncThunk(
   "reservation/cancelReservation",
   async (id, { rejectWithValue }) => {
@@ -63,9 +57,7 @@ export const cancelReservation = createAsyncThunk(
   }
 );
 
-// ============================
-// SLICE
-// ============================
+
 const reservationSlice = createSlice({
   name: "reservation",
   initialState: {

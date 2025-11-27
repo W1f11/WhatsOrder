@@ -19,5 +19,7 @@ class VerifyCsrfToken extends Middleware
         'logout',
         'api/logout',
         '**/logout',
+        'api/reservations',
+        'api/orders',
     ];
 }
